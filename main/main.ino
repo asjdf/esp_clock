@@ -83,9 +83,9 @@ void timeHandler() {
 
 void drawTime() {
     struct tm time0;
-    time0.tm_year = 2021 - 1900;
-    time0.tm_mon = 6;
-    time0.tm_mday = 6;
+    time0.tm_year = 2020 - 1900;
+    time0.tm_mon = 12;
+    time0.tm_mday = 14;
     time0.tm_hour = 0;
     time0.tm_min = 0;
     time0.tm_sec = 0;
@@ -94,14 +94,15 @@ void drawTime() {
     time_t rawtime;
     time(&rawtime);
     Serial.println(rawtime);
-    int diffTime = t - rawtime;  //直接一波解决时差
+    int diffTime = t - rawtime;  //时差问题不想解决 累了
     int diffDay = diffTime / (60 * 60 * 24);
     int diffHour = diffTime % (60 * 60 * 24) / (60 * 60);
     int diffMin = diffTime % (60 * 60) / (60);
     int diffSec = diffTime % 60;
     Heltec.display->clear();
     char str1[30];
-    sprintf(str1, "Left: %dD %dH %dM %dS", diffDay, diffHour, diffMin, diffSec);
+    sprintf(str1, "Left: %dD %02dH %02dM %02dS", diffDay, diffHour, diffMin,
+            diffSec);
     Heltec.display->setLogBuffer(2, 20);
     Heltec.display->println(str1);
     Heltec.display->drawLogBuffer(0, 0);
