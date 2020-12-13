@@ -1,12 +1,13 @@
 #include <ESP8266WebServer.h>
 #include <avr/pgmspace.h>
+#include <math.h>
+#include <string.h>
 #include <sys/time.h>
 #include <time.h>
 #include "heltec.h"  // alias for `#include "SSD1306Wire.h"
 
 #define APSSID "ESP_clock"
 #define APPSK ""
-#define TIMEZONE "CST-8"
 
 const char* ssid = APSSID;
 const char* password = APPSK;
@@ -16,8 +17,6 @@ ESP8266WebServer server(80);
 int timeSet = 0;
 
 void setup() {
-    setenv("TZ", TIMEZONE, 1);  // mountain time zone from #define at top
-    tzset();
     Heltec.begin(true /*DisplayEnable Enable*/, true /*Serial Enable*/);
     // IPAddress local_IP(192, 168, 1, 1);
     // IPAddress gateway(192, 168, 1, 1);
@@ -29,15 +28,21 @@ void setup() {
     server.on("/set", timeHandler);
     server.onNotFound(rootHandler);  //其他功能暂时不想做 所以就这样吧
     server.begin();
+    Heltec.display->clear();
+    Heltec.display->setLogBuffer(2, 30);
+    Heltec.display->drawString(0, 0, "Wait for connection");
+    // Heltec.display->drawLogBuffer(0, 0);
+    Heltec.display->display();
+    delay(100);
 }
 void loop() {
+    if (timeSet) {
+        drawTime();
+    }
+
     server.handleClient();
-    // time_t rawtime;
-    // struct tm* info;
-    // time(&rawtime);
-    // info = localtime(&rawtime);
-    // Serial.println(asctime(info));
 }
+
 void rootHandler() {
     const char msg[] = {R"rawliteral(Time:%s
 <script>
@@ -74,4 +79,31 @@ void timeHandler() {
     settimeofday(&tmSet, NULL);
     timeSet = 1;  //时间设置完了
     server.send(200, "text/html", "Done");
+}
+
+void drawTime() {
+    struct tm time0;
+    time0.tm_year = 2021 - 1900;
+    time0.tm_mon = 6;
+    time0.tm_mday = 6;
+    time0.tm_hour = 0;
+    time0.tm_min = 0;
+    time0.tm_sec = 0;
+    time_t t = mktime(&time0);
+    Serial.println(t);
+    time_t rawtime;
+    time(&rawtime);
+    Serial.println(rawtime);
+    int diffTime = t - rawtime;  //直接一波解决时差
+    int diffDay = diffTime / (60 * 60 * 24);
+    int diffHour = diffTime % (60 * 60 * 24) / (60 * 60);
+    int diffMin = diffTime % (60 * 60) / (60);
+    int diffSec = diffTime % 60;
+    Heltec.display->clear();
+    char str1[30];
+    sprintf(str1, "Left: %dD %dH %dM %dS", diffDay, diffHour, diffMin, diffSec);
+    Heltec.display->setLogBuffer(2, 20);
+    Heltec.display->println(str1);
+    Heltec.display->drawLogBuffer(0, 0);
+    Heltec.display->display();
 }
