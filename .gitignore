@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+main/.vscode/arduino.json
+main/.vscode/c_cpp_properties.json
+main/.vscode/settings.json
