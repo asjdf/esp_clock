@@ -6,6 +6,7 @@
 
 #define APSSID "ESP_clock"
 #define APPSK ""
+#define TIMEZONE "CST-8"
 
 const char* ssid = APSSID;
 const char* password = APPSK;
@@ -15,10 +16,12 @@ ESP8266WebServer server(80);
 int timeSet = 0;
 
 void setup() {
+    setenv("TZ", TIMEZONE, 1);  // mountain time zone from #define at top
+    tzset();
     Heltec.begin(true /*DisplayEnable Enable*/, true /*Serial Enable*/);
-    IPAddress local_IP(192, 168, 1, 1);
-    IPAddress gateway(192, 168, 1, 1);
-    IPAddress subnet(255, 255, 255, 0);
+    // IPAddress local_IP(192, 168, 1, 1);
+    // IPAddress gateway(192, 168, 1, 1);
+    // IPAddress subnet(255, 255, 255, 0);
     WiFi.softAP(ssid, password);
     IPAddress myIP = WiFi.softAPIP();
     Serial.print("AP IP address: ");
@@ -48,12 +51,12 @@ void rootHandler() {
   xhttp.open("GET", "/set?year=" + myDate.getFullYear() + "&mon=" + (myDate.getMonth()+1) + "&day=" + myDate.getDate() + "&hour=" + myDate.getHours() + "&min=" + myDate.getMinutes() + "&sec=" + myDate.getSeconds(), true);
   xhttp.send();
 </script>)rawliteral"};
+    char the_page[1000];
 
     time_t rawtime;
     struct tm* info;
     time(&rawtime);
     info = localtime(&rawtime);
-    char the_page[1000];
     sprintf(the_page, msg, asctime(info));
     server.send_P(200, "text/html", the_page);
 }
