@@ -83,9 +83,9 @@ void timeHandler() {
 
 void drawTime() {
     struct tm time0;
-    time0.tm_year = 2020 - 1900;
-    time0.tm_mon = 12;
-    time0.tm_mday = 14;
+    time0.tm_year = 2021 - 1900;
+    time0.tm_mon = 6;
+    time0.tm_mday = 7;
     time0.tm_hour = 0;
     time0.tm_min = 0;
     time0.tm_sec = 0;
@@ -94,7 +94,7 @@ void drawTime() {
     time_t rawtime;
     time(&rawtime);
     Serial.println(rawtime);
-    int diffTime = t - rawtime;  //时差问题不想解决 累了
+    int diffTime = t - rawtime + (8 * 60 * 60);  //一键解决时差问题
     int diffDay = diffTime / (60 * 60 * 24);
     int diffHour = diffTime % (60 * 60 * 24) / (60 * 60);
     int diffMin = diffTime % (60 * 60) / (60);
